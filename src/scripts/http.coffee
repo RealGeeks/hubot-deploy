@@ -27,6 +27,35 @@ Verifiers = require(Path.join(__dirname, "..", "models", "verifiers"))
 
 AppsJsonFile = process.env['HUBOT_DEPLOY_APPS_JSON'] or "apps.json"
 AppsJsonData = JSON.parse(Fs.readFileSync(AppsJsonFile))
+
+Helpers =
+  fetchApp: (appName) -> AppsJsonData[appName]
+  isValidApp: (appName) -> !!fetchApp(appName)
+  appBrainKey: (appName) -> "candeploy:#{fetchApp(appName).repository}"
+  repoBrainKey: (repo) -> "candeploy:#{repo}"
+
+  isWaiting: (user, ref, waitingRoom) -> waitingRoom[ref].reduce(
+    (acc, curr) -> acc && curr.name == user.name,
+    false
+  )
+
+  setWaiting: (user, sha, waitingRoom) ->
+    peanutGallery = waitingRoom[sha]
+    waitingRoom[sha] = [ peanutGallery..., user ]
+    return waitingRoom
+
+  createStateReport: (givenRef, state) ->
+    switch state
+      when 'success' then "#{givenRef.appName}/#{givenRef.ref} succeeded! :shipitparrot: Ready to deploy!"
+      when 'failure' then """
+      :existentialdread: there was a failure in #{givenRef.appName}/#{givenRef.ref}
+      pls fix the big b0rk b4 deploying
+      """
+      when 'error' then """
+      :existentialdread: there was an error in #{givenRef.appName}/#{givenRef.ref}! pls fix the big b0rk b4 deploying
+      """
+      else "#{givenRef.appName}/#{givenRef.ref} has a status of #{state}; not quite sure what that means"
+
 ###########################################################################
 module.exports = (robot) ->
   ipVerifier = new Verifiers.GitHubWebHookIpVerifier
@@ -135,8 +164,11 @@ module.exports = (robot) ->
             return res.end(JSON.stringify({message: status.toSimpleString()}))
 
           when "status"
-            # TODO: do the redis brain check here
             status = new CommitStatus deliveryId, req.body
+
+            # Notify all users of the peanut gallery
+            brainKey = status.repoName
+            waitingRoom = robot.brain.get(brainKey) ? {}
 
             robot.emit "github_commit_status_event", status
 
