@@ -135,6 +135,7 @@ module.exports = (robot) ->
             return res.end(JSON.stringify({message: status.toSimpleString()}))
 
           when "status"
+            # TODO: do the redis brain check here
             status = new CommitStatus deliveryId, req.body
 
             robot.emit "github_commit_status_event", status

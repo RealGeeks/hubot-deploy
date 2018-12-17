@@ -151,9 +151,29 @@ class Deployment
           if requiredContexts?
             failedContexts.push(context) for context in requiredContexts when context not in namedContexts
 
+          # TODO: we can start listening here
+          # TODO: define a webhook for handling these tracking things
+
           bodyMessage = """
           Unmet required commit status contexts for #{name}: #{failedContexts.join(',')} failed.
+          I'll ping you when it's ready to deploy!
           """
+
+          # TODO: we can create some parser for the webhook responses to compare by ref
+          # as opposed to storing the sha. this way we can implement tracking behavior for a branch
+
+          # the problem then becomes:
+            # determining the type of ref (is it a branch? sha? tag?)
+            # detecting the same ref type within a webhook event (can I just
+            #  look for an occurence of ref in the raw string?)
+
+          # that'll have to be something i determine here unfortunately
+
+          # the other option is
+            # just keep asking github for the status of the given ref
+            # everytime we get a webhook event, just query github again to see if it passed
+            # hacky, but much less error prone imo, and then i don't care wtf
+            #  people give me as a ref
 
         if bodyMessage == "Not Found"
           message = "Unable to create deployments for #{repository}. Check your scopes for this token."
