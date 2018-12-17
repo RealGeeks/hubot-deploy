@@ -166,9 +166,17 @@ module.exports = (robot) ->
           when "status"
             status = new CommitStatus deliveryId, req.body
 
-            # Notify all users of the peanut gallery
             brainKey = status.repoName
             waitingRoom = robot.brain.get(brainKey) ? {}
+            peanutGallery = waitingRoom[status.sha] ? []
+
+            notify = (dev) ->
+              stateReport = Helpers.createStateReport(dev.givenRef, status.state)
+              robot.messageRoom(dev.name, stateReport)
+
+            notify dev of peanutGallery for dev in peanutGallery
+            waitingRoom[status.sha] = []
+            robot.brain.set(brainKey, waitingRoom)
 
             robot.emit "github_commit_status_event", status
 
