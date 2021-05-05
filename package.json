@@ -1,5 +1,5 @@
 {
-  "name": "hubot-deploy",
+  "name": "@realgeeks/hubot-deploy",
   "version": "0.13.27",
   "author": "Corey Donohoe <atmos@atmos.org>",
   "description": "hubot script for GitHub Flow",
