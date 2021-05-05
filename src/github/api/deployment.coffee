@@ -94,6 +94,10 @@ class Deployment
     new GitHubApi(@userToken, @application)
 
   api: ->
+    console.log("----------------------------------------------------------")
+    console.log("github/api/deployment.api")
+    console.log(typeof @apiConfig().token)
+    console.log("----------------------------------------------------------")
     api = Octonode.client(@apiConfig().token, { hostname: @apiConfig().hostname })
     api.requestDefaults.agentOptions = { ca: @caFile } if @caFile
     api
