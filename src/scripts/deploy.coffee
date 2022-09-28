@@ -106,6 +106,8 @@ module.exports = (robot) ->
 
     deployment = new Deployment(name, ref, task, env, force, hosts)
 
+    robot.logger.info msg
+
     unless deployment.isValidApp()
       msg.reply "#{name}? Never heard of it."
       return
