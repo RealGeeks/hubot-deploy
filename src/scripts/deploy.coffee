@@ -136,7 +136,6 @@ module.exports = (robot) ->
 
     if robot.adapterName is "slack"
       deployment.user = user.name
-      deployment.room = robot.adapter.client.rtm.dataStore.getChannelGroupOrDMById(msg.message.user.room).name
 
     deployment.yubikey   = yubikey
     deployment.adapter   = robot.adapterName
